@@ -1,0 +1,75 @@
+---
+config:
+  theme: dark
+  look: handDrawn
+---
+sequenceDiagram
+ participant browser
+ participant server
+
+ %% the browser first sends a GET request to the server and fetches the document (notes)
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes 
+ activate server
+ %% then the server sends the HTML file to the browser and 200 OK means that it was successful
+ server->>browser: 200 OK (Content-Type: text/html)
+ deactivate server
+
+ %% the HTML file contains two things: 1. <link> for css stylesheet and  <script> for Javascript file
+ %% so the html file makes the browser send two more Get request for the .css and .js files from the server
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+ activate server
+ server->>browser: 200 OK (Content-Type: text/css)
+ deactivate server
+ %% And for the js file:
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+ activate server
+ server->>browser: 200 OK (Content-Type: application/javascript)
+ deactivate server
+
+ %% When browser executes the js file, it reaches here: xhttp.open("GET", "/exampleapp/data.json", true)
+ %% so the browser will send another GET request to the server for fetching the JSON file
+ note right of browser: the browser starts executing the javascript and fetching the JSON File
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+ activate server
+ server->>browser: 200 OK (Content-Type: application/json) <-> [{content: "fggfg", date: "..."},…]
+ deactivate server
+ %% xhttp.onreadystatechange callback handles rendering the notes
+ %% the javascript will get the data and for example, it will add it to a list
+
+ note right of browser: the callback function is executed by the browser so the notes gets rendered
+ note right of browser: + User writes a note (for example: test) and clicks on "Save" (/new_note)
+ %% When the user clicks on the submit ("save") button, browser will execute the /new_note form with POST action
+ browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note (Form Data: note=test)
+ activate server
+ %% Server returns status code 302 Found that is a URL Redirect so it asks the browser to send a GET request for location "notes"
+ note left of server: new notes will be pushed to an array in the server so they will be visible until the server restarts
+ server->>browser: 302 Found (URL redirect) Location: notes
+ deactivate server
+ note left of server: the server asks the browser for a new GET request to "notes" (which is a reload)
+  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes 
+ activate server
+ %% then the server sends the HTML file to the browser and 200 OK means that it was successful
+ server->>browser: 200 OK (Content-Type: text/html)
+ deactivate server
+ %% the HTML file contains two things: 1. <link> for css stylesheet and  <script> for Javascript file
+ %% so the html file makes the browser send two more Get request for the .css and .js files from the server
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+ activate server
+ server->>browser: 200 OK (Content-Type: text/css)
+ deactivate server
+ %% And for the js file:
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+ activate server
+ server->>browser: 200 OK (Content-Type: application/javascript)
+ deactivate server
+ %% the "test" note can be viewed in the Network Tab -> new_note -> Payload -> form data
+ 
+ %% When browser executes the js file, it reaches here: xhttp.open("GET", "/exampleapp/data.json", true)
+ %% so the browser will send another GET request to the server for fetching the JSON file
+ note right of browser: the browser starts executing the javascript and fetching the JSON File
+ browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+ activate server
+ server->>browser: 200 OK (Content-Type: application/json) <-> [{content: "test", date: "..."},…]
+ deactivate server
+ %% xhttp.onreadystatechange callback handles rendering the notes:
+ note right of browser: the javascript will get the data, and for example, it will add it to a list so the user can view it
