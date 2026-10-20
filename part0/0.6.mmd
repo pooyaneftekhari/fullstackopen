@@ -1,0 +1,43 @@
+---
+config:
+  theme: dark
+---
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    server->>browser: 200 OK (Content-Type: text/html)
+    deactivate server
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server->>browser: 200 OK (Content-Type: text/css)
+    deactivate server
+    
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    server->>browser: 200 OK (Content-Type: application/javascript)
+    deactivate server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server->>browser: 200 OK (Content-Type: application/json) [{content: "test", date: "..."},…]
+    deactivate server
+    %% the existing notes will be displayed at this point as I said in the excercise 0.5
+
+    note right of browser: User will type "test" in the input and save it
+    %% when you go to Network Tab -> /new_note_spa -> Request Payload you can see the content of it: {content: "test", date: "2026-10-20T10:47:47.253Z"}
+    note right of browser: We prevent the reload and default behavior of the form with e.preventDefault()
+    note right of browser: We push the new note to the "notes" array
+    note right of browser: we use redrawNotes() to update the notes on page
+    note right of browser: we send the new note to the server via XMLHttpRequest
+    %% Is the .preventDefault() the only difference between traditional apps and SPA? No
+    %% we will use JSON.stringify() and .setRequestHeader('Content-type', 'application/json') too
+    note right of browser: request payload: {content: "test", date: "2026-10-20T10:47:47.253Z"} (it's JSON)
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa (Content-Type: application/json)
+        
+    activate server
+    note left of server: Server saves the note until the next server restart
+    server->>browser: 201 Created (application/json) 
+    deactivate server

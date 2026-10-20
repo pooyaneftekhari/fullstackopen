@@ -1,0 +1,29 @@
+---
+config:
+  theme: dark
+---
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    server->>browser: 200 OK (Content-Type: text/html)
+    deactivate server
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server->>browser: 200 OK (Content-Type: text/css)
+    deactivate server
+    
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    server->>browser: 200 OK (Content-Type: application/javascript)
+    deactivate server
+     note right of browser: at this point the browser will execute the javascript which will request the data.json
+    note right of browser: we use xhttp.open("GET", "/exampleapp/data.json", true) and .send() to get the data.json
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server->>browser: 200 OK (Content-Type: application/json) [{content: "test", date: "..."},…]
+    deactivate server
+    note right of browser: we use xhttp.onreadystatechange callback to get the notes and render them in a list
